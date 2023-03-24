@@ -3,14 +3,17 @@ import colour
 from math import ceil
 import sys
 from PIL import Image
-from random import randrange
+import random
+
+# print out points of interest
+INTEREST = False
 
 class Mandelbrot:
     def __init__(self):
         self.z = complex(0.0,0.0)
         self.conf = {
-                'width'     : 1440,
-                'height'    : 900,
+                'width'     : 512,
+                'height'    : 512,
                 'centerx'   : 0.0,
                 'centery'   : 0.0,
                 'axislength': 0.25,
@@ -26,26 +29,17 @@ class Mandelbrot:
         for i in range(maxIter):
             z = z * z + c
             if abs(z) > 2:
-                # if i == maxIter - 2:
-                    # self.write(c)
+                if i == maxIter - 2 and INTEREST:
+                    print(f'{c.imag},{c.imag}')
                 return i + 1
         return maxIter
 
     def getIterations(self):
         return self.conf['iterations']
 
-    def write(self, c):
-        c = str(c).replace(')','#').replace('j','#').replace('+','#,')
-        c = c.replace('(-','#A').replace('-','#,-')
-        c = c.replace('A','#-').replace('(','#')
-        print(c)
-        
     def centerSet(self):
         with open('interest') as afile:
-            line = next(afile)
-            for num, aline in enumerate(afile, 2):
-                if randrange(num): continue
-                line = aline
+            line = random.choice(afile.readlines())
 
         line = line.split(',')
         self.conf['centerx'] = float(line[0])
@@ -71,8 +65,6 @@ class Pallette():
 
 
 def paint(fractal, gradient):
-    '''Paint a Fractal image into the TKinter PhotoImage canvas.
-    This code creates an image which is 512x512 pixels in size.'''
     fractalConf = fractal.conf
 
     BLACK = '#000000'
@@ -93,14 +85,14 @@ def paint(fractal, gradient):
 
     imgArray = []
 
-    tot = 0
+    # progress = 0
 
     for row in range(ceil(-HEIGHT/2), ceil(HEIGHT/2)):
         for col in range(ceil(-WIDTH/2), ceil(WIDTH/2)):
 
-            tot += 1
-            # if tot % 1000 == 0:
-                # print(str(ceil(100*tot/(WIDTH*HEIGHT))).zfill(2),end='%\r')
+            # progress += 1
+            # if progress % 1000 == 0:
+                # print(str(ceil(100*progress/(WIDTH*HEIGHT))).zfill(2),end='%\r')
             
             x = cx + col * pixelW
             y = cy + row * pixelW
@@ -113,7 +105,6 @@ def paint(fractal, gradient):
 
             imgArray += [color]
 
-            
     img = Image.new('RGB', (WIDTH, HEIGHT))
     img.putdata(imgArray)
     img.save('mandelbrot.png')
