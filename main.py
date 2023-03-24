@@ -1,17 +1,16 @@
-from colour import Color
+#!python3
 import colour 
 from math import ceil
 import sys
 from PIL import Image
-from random import uniform
-import random
+from random import randrange
 
 class Mandelbrot:
     def __init__(self):
         self.z = complex(0.0,0.0)
         self.conf = {
-                'width'     : 1366,
-                'height'    : 768,
+                'width'     : 1440,
+                'height'    : 900,
                 'centerx'   : 0.0,
                 'centery'   : 0.0,
                 'axislength': 0.25,
@@ -35,19 +34,17 @@ class Mandelbrot:
     def getIterations(self):
         return self.conf['iterations']
 
-
     def write(self, c):
         c = str(c).replace(')','#').replace('j','#').replace('+','#,')
         c = c.replace('(-','#A').replace('-','#,-')
         c = c.replace('A','#-').replace('(','#')
         print(c)
-
         
     def centerSet(self):
         with open('interest') as afile:
             line = next(afile)
             for num, aline in enumerate(afile, 2):
-                if random.randrange(num): continue
+                if randrange(num): continue
                 line = aline
 
         line = line.split(',')
@@ -57,12 +54,17 @@ class Mandelbrot:
 
 class Pallette():
     def __init__(self, iterations):
-        pre='8700ff-230051-fffffe-1c1c1c-0a0a0a'
-        pallette = ['#'+s for s in pre.split('-')]
+        pallette = [
+          '#8700ff',
+          '#230051',
+          '#fffffe',
+          '#1c1c1c',
+          '#0a0a0a',
+        ]
 
         self.grad = []
         for n, h in enumerate(pallette[1:]):
-            self.grad += list(Color(pallette[n]).range_to(h, ceil(iterations/(2**(3-n)))))
+            self.grad += list(colour.Color(pallette[n]).range_to(h, ceil(iterations/(2**(3-n)))))
             
     def getColor(self, n):
         return self.grad[n - 1]
@@ -86,16 +88,12 @@ def paint(fractal, gradient):
     miny = cy - (al / 2.0)
     maxy = cy + (al / 2.0)
 
-    # At this scale, how much length and height on the imaginary plane does one
-    # pixel take?
     pixelW = abs(maxx - minx) / WIDTH
     pixelH = abs(maxy - miny) / HEIGHT
 
     imgArray = []
 
     tot = 0
-
-    
 
     for row in range(ceil(-HEIGHT/2), ceil(HEIGHT/2)):
         for col in range(ceil(-WIDTH/2), ceil(WIDTH/2)):
@@ -118,11 +116,9 @@ def paint(fractal, gradient):
             
     img = Image.new('RGB', (WIDTH, HEIGHT))
     img.putdata(imgArray)
-    img.save('wall.png')
+    img.save('mandelbrot.png')
 
 fractal = Mandelbrot()
 gradient = Pallette(fractal.getIterations())
 
 paint(fractal, gradient)
-
-
